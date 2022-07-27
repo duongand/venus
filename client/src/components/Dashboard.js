@@ -1,11 +1,10 @@
 import Options from "./dashboard/Options";
 
-function Dashboard({ playlistItems, selectedPlaylist, selectedPlaylistTracks }) {
+function Dashboard({ playlistItems, selectedPlaylist, selectedPlaylistTracks, handleChange }) {
     return (
-        <div className="dashboard">
+        <div className="dashboard" onChange={handleChange}>
             <h1 className="dashboard--title">DASHBOARD</h1>
-            <p>Selected playlist: {selectedPlaylist}</p>
-            {playlistItems && <Options playlistItems={playlistItems} />}
+            {playlistItems && <Options playlistItems={playlistItems} handleChange={handleChange} />}
         </div>
     );
 };

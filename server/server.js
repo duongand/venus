@@ -102,7 +102,44 @@ app.get('/get_playlists', (req, res) => {
 });
 
 app.get('/get_playlist_tracks', (req, res) => {
-    
+    const accessToken = req.query.access_token;
+    const playlistIds = req.query.id;
+
+    axios.get(`${BASE_API_URL}/v1/playlists/${playlistIds}/tracks`, {
+        params: {
+            limit: 50,
+            market: 'US'
+        },
+        headers: {
+            Accept: 'application/json',
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+        }
+    }).then((response) => {
+        res.send(response.data.items);
+    }).catch((error) => {
+        console.log(error);
+    });
+});
+
+app.get('/get_audio_features', (req, res) => {
+    const accessToken = req.query.access_token;
+    const trackIds = req.query.track_ids;
+
+    axios.get(`${BASE_API_URL}/v1/audio-features`, {
+        params: {
+            ids: trackIds
+        },
+        headers: {
+            Accept: 'application/json',
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+        }
+    }).then((response) => {
+        res.send(response.data.audio_features);
+    }).catch((error) => {
+        console.log(error);
+    });
 });
 
 app.get('/*', (req, res) => {

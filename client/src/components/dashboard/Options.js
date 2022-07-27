@@ -4,9 +4,12 @@ function Options({ playlistItems }) {
     ));
 
     return (
-        <select className="dashboard--selection">
-            {playlistOptions}
-        </select>
+        <>
+            <label for="dashboard--selection">Chosen playlist: </label>
+            <select id="dashboard--selection" className="dashboard--selection">
+                {playlistOptions}
+            </select>
+        </>
     );
 };
 
