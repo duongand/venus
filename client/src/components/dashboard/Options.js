@@ -1,12 +1,12 @@
-function Options({ playlistItems }) {
-    const playlistOptions = playlistItems.map((playlist) => (
+function Options({ playlistNames, handlePlaylistChange }) {
+    const playlistOptions = playlistNames.map((playlist) => (
         <option value={playlist}>{playlist}</option>
     ));
 
     return (
         <>
-            <label for="dashboard--selection">Chosen playlist: </label>
-            <select id="dashboard--selection" className="dashboard--selection">
+            <label for="dashboard--selection">Playlist: </label>
+            <select id="dashboard--selection" className="dashboard--selection" onChange={handlePlaylistChange}>
                 {playlistOptions}
             </select>
         </>

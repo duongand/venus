@@ -58,7 +58,7 @@ app.get('/callback', (req, res) => {
                 'Authorization': 'Basic ' + new Buffer.from(CLIENT_ID + ':' + CLIENT_SECRET).toString('base64')
             },
         }).then((response) => {
-            if (response.status == 200) {
+            if (response.status === 200) {
                 const params = new URLSearchParams({
                     access_token: response.data.access_token,
                     refresh_token: response.data.refresh_token,
@@ -67,7 +67,7 @@ app.get('/callback', (req, res) => {
 
                 res.redirect(`http://localhost:8888/?${params}`);
             } else {
-                res.redirect(`/?${new URLSearchParams({
+                res.redirect(`http://localhost:8888/?${new URLSearchParams({
                     error: 'invalid_token'
                 })}`);
             };
@@ -79,6 +79,34 @@ app.get('/callback', (req, res) => {
 
 app.get('/refresh_token', (req, res) => {
     const refreshToken = req.query.refresh_token;
+    const data = new URLSearchParams({
+        grant_type: 'refresh_token',
+        refresh_token: refreshToken
+    });
+
+    axios({
+        method: 'post',
+        url: 'https://accounts.spotify.com/api/token',
+        data,
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Authorization': 'Basic ' + new Buffer.from(CLIENT_ID + ':' + CLIENT_SECRET).toString('base64')
+        },
+    }).then((response) => {
+        if (response.status === 200) {
+            const params = new URLSearchParams({
+                access_token: response.data.access_token,
+            }).toString();
+
+            res.redirect(`http://localhost:8888/?${params}`);
+        } else {
+            res.redirect(`http://localhost:8888/?${new URLSearchParams({
+                error: 'invalid_token'
+            })}`);
+        };
+    }).catch((error) => {
+        res.send(error);
+    });
 });
 
 app.get('/get_playlists', (req, res) => {
@@ -118,7 +146,7 @@ app.get('/get_playlist_tracks', (req, res) => {
     }).then((response) => {
         res.send(response.data.items);
     }).catch((error) => {
-        console.log(error);
+        res.send(error);
     });
 });
 
@@ -138,7 +166,7 @@ app.get('/get_audio_features', (req, res) => {
     }).then((response) => {
         res.send(response.data.audio_features);
     }).catch((error) => {
-        console.log(error);
+        res.send(error);
     });
 });
 

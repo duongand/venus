@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
-import { checkLocalStorage, getAccessToken, setLocalStorage } from './authFunctions';
 
 const axios = require('axios');
 
@@ -9,28 +8,32 @@ function App() {
 	const [accessToken, setAccessToken] = useState(null);
 	const [refreshToken, setRefreshToken] = useState(null);
 
-	const [playlistItems, setPlaylistItems] = useState([]);
+	const [playlistNames, setPlaylistNames] = useState([]);
 	const [playlistIds, setPlaylistIds] = useState({});
 	const [selectedPlaylist, setSelectedPlaylist] = useState('');
-	const [selectedPlaylistTracks, setSelectedPlaylistTracks] = useState([]);
 	const [playlistTrackIds, setPlaylistTrackIds] = useState('');
 	const [trackInformation, setTrackInformation] = useState({});
-	const [trackAudioFeatures, setTrackAudioFeatures] = useState({});
-	const [compiledInformation, setCompiledInformation] = useState([]);
+	const [compiledInformation, setCompiledInformation] = useState(null);
 
-	function handleChange(event) {
+	const [chartKey, setChartKey] = useState('artist');
+
+	function handlePlaylistChange(event) {
 		setSelectedPlaylist(event.target.value);
+		setPlaylistTrackIds('');
+		setCompiledInformation(null);
+		setChartKey('artist');
+	};
+
+	function handleKeyChange(event) {
+		setChartKey(event.target.value);
 	};
 
 	useEffect(() => {
-		if (checkLocalStorage()) {
-			const { storedAccessToken, storedRefreshToken } = getAccessToken();
-
-			setAccessToken(storedAccessToken);
-			setRefreshToken(storedRefreshToken);
+		if (window.location.search) {
+			const urlParams = new URLSearchParams(window.location.search);
+			setAccessToken(urlParams.get('access_token'));
+			setRefreshToken(urlParams.get('refresh_token'));
 			window.history.pushState({}, null, '/');
-		} else {
-			setLocalStorage();
 		};
 	}, [])
 
@@ -42,22 +45,22 @@ function App() {
 				access_token: accessToken
 			}
 		}).then((response) => {
-			const playlistNames = response.data.items.map((playlist) => {
+			const tempPlaylistNames = response.data.items.map((playlist) => {
 				return playlist.name;
 			});
 
-			const playlistIdsTemp = {};
+			const tempPlaylistIds = {};
 			for (const playlist of response.data.items) {
-				playlistIdsTemp[playlist.name] = {
+				tempPlaylistIds[playlist.name] = {
 					'id': playlist.id
 				};
 			};
 
-			setPlaylistItems(playlistNames);
-			setPlaylistIds(playlistIdsTemp)
-			setSelectedPlaylist(playlistNames[0]);
+			setPlaylistNames(tempPlaylistNames);
+			setPlaylistIds(tempPlaylistIds)
+			setSelectedPlaylist(tempPlaylistNames[0]);
 		}).catch((error) => {
-			console.log(error);
+			console.send(error);
 		});
 	}, [accessToken]);
 
@@ -82,7 +85,8 @@ function App() {
 				preTrackInformation[data.track.id] = {
 					'name': data.track.name,
 					'artist': data.track.artists[0].name,
-					'album': data.track.album.name
+					'album': data.track.album.name,
+					'popularity': data.track.popularity
 				};
 			});
 
@@ -119,12 +123,11 @@ function App() {
 					'valence': track.valence,
 					'name': trackInformation[tempTrackId].name,
 					'artist': trackInformation[tempTrackId].artist,
-					'album': trackInformation[tempTrackId].album
+					'album': trackInformation[tempTrackId].album,
+					'popularity': trackInformation[tempTrackId].popularity
 				};
-
 				tempCompiledInformation.push(tempTrack);
 			};
-
 			setCompiledInformation(tempCompiledInformation);
 		}).catch((error) => {
 			console.log(error);
@@ -135,10 +138,12 @@ function App() {
 		<div className="App">
 			{accessToken ?
 				<Dashboard
-					playlistItems={playlistItems}
+					playlistNames={playlistNames}
 					selectedPlaylist={selectedPlaylist}
-					selectedPlaylistTracks={selectedPlaylistTracks}
-					handleChange={handleChange}
+					selectedPlaylistTracks={compiledInformation}
+					chartKey={chartKey}
+					handlePlaylistChange={handlePlaylistChange}
+					handleKeyChange={handleKeyChange}
 				/> :
 				<Login />
 			}
