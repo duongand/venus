@@ -65,9 +65,9 @@ app.get('/callback', (req, res) => {
                     expires_in: response.data.expires_in
                 }).toString();
 
-                res.redirect(`https://react-spotify-venus.herokuapp.com/?${params}`);
+                res.redirect(`http://localhost:8888/?${params}`);
             } else {
-                res.redirect(`https://react-spotify-venus.herokuapp.com/?${new URLSearchParams({
+                res.redirect(`http://localhost:8888/?${new URLSearchParams({
                     error: 'invalid_token'
                 })}`);
             };
@@ -98,9 +98,9 @@ app.get('/refresh_token', (req, res) => {
                 access_token: response.data.access_token,
             }).toString();
 
-            res.redirect(`https://react-spotify-venus.herokuapp.com/?${params}`);
+            res.redirect(`http://localhost:8888/?${params}`);
         } else {
-            res.redirect(`https://react-spotify-venus.herokuapp.com/?${new URLSearchParams({
+            res.redirect(`http://localhost:8888/?${new URLSearchParams({
                 error: 'invalid_token'
             })}`);
         };
