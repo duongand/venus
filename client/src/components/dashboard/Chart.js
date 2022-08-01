@@ -28,24 +28,24 @@ function Chart({ selectedPlaylistTracks, chartKey }) {
 
     useEffect(() => {
         if (selectedPlaylistTracks && chartRef) {
-            d3.selectAll("g").remove();
-            d3.selectAll(".label").remove();
-            d3.selectAll(".axis").remove();
+            d3.selectAll('g').remove();
+            d3.selectAll('.label').remove();
+            d3.selectAll('.axis').remove();
 
             const svg = d3.select(chartRef.current)
-                .attr("viewBox", `0 0 ${width} ${height}`)
-                .attr("preserverAspectiveRatio", "xMidYMid meet");
+                .attr('viewBox', `0 0 ${width} ${height}`)
+                .attr('preserverAspectiveRatio', 'xMidYMid meet');
 
-            const svgContainer = d3.select(".chart-container");
+            const svgContainer = d3.select('.chart-container');
 
-            const node = svg.append("g")
-                .attr("transform", `translate(${15}, ${15})`);
+            const node = svg.append('g')
+                .attr('transform', `translate(${15}, ${15})`);
 
-            circles.current = node.selectAll(".bubble");
-            labels.current = node.selectAll(".label");
+            circles.current = node.selectAll('.bubble');
+            labels.current = node.selectAll('.label');
 
             nodes = selectedPlaylistTracks.map((element) => {
-                element["radius"] = 5;
+                element['radius'] = 5;
                 return element;
             });
 
@@ -53,41 +53,41 @@ function Chart({ selectedPlaylistTracks, chartKey }) {
 
             const simulation = d3.forceSimulation()
                 .velocityDecay(0.2)
-                .force("charge", d3.forceManyBody().strength(7))
-                .force("collide", d3.forceCollide().radius(function (d) { return d.radius }))
-                .on("tick", tick);
+                .force('charge', d3.forceManyBody().strength(7))
+                .force('collide', d3.forceCollide().radius(function (d) { return d.radius }))
+                .on('tick', tick);
 
-            circles = node.selectAll(".bubble")
+            circles = node.selectAll('.bubble')
                 .data(nodes)
                 .enter()
-                .append("circle")
-                .attr("r", (node) => node.radius)
-                .attr("cx", (node) => node.x)
-                .attr("cy", (node) => node.y)
-                .attr("class", "bubble")
-                .on("mouseover", function(d) {
-                    tooltip.current.text(d["target"]["__data__"]["name"])
-                        .style("visibility", "visible")
-                        .style("left", d.pageX + "px")
-                        .style("top", d.pageY + "px")
+                .append('circle')
+                .attr('r', (node) => node.radius)
+                .attr('cx', (node) => node.x)
+                .attr('cy', (node) => node.y)
+                .attr('class', 'bubble')
+                .on('mouseover', function(d) {
+                    tooltip.current.html(`${d['target']['__data__']['name']}<br/>${d['target']['__data__']['artist']}`)
+                        .style('visibility', 'visible')
+                        .style('left', d.pageX + 'px')
+                        .style('top', d.pageY + 'px')
                 })
-                .on("mouseleave", function(d) {
-                    tooltip.current.style("visibility", "hidden");
+                .on('mouseleave', function(d) {
+                    tooltip.current.style('visibility', 'hidden');
                 });
 
-            tooltip.current = svgContainer.append("div")
-                .attr("className", "tooltip")
-                .style("position", "absolute")
-                .style("visibility", "hidden")
-                .style("color", "black")
-                .style("background-color", "white")
-                .style("border", "1px solid black")
-                .style("border-radius", "5px")
-                .style("padding", "2px");
+            tooltip.current = svgContainer.append('div')
+                .attr('className', 'tooltip')
+                .style('position', 'absolute')
+                .style('visibility', 'hidden')
+                .style('color', 'black')
+                .style('background-color', 'white')
+                .style('border', '1px solid black')
+                .style('border-radius', '5px')
+                .style('padding', '2px');
 
             simulation.nodes(nodes);
 
-            if (chartType[chartKey] === "radial") {
+            if (chartType[chartKey] === 'radial') {
                 let min, max;
                 showLabels.current = false;
 
@@ -98,31 +98,31 @@ function Chart({ selectedPlaylistTracks, chartKey }) {
                     .domain([min, max])
                     .range([50, 1100]);
 
-                simulation.force("charge", d3.forceManyBody().strength(3))
-                    .force("x", d3.forceX().strength(0.06).x((element) => scale(element[chartKey])))
-                    .force("y", d3.forceY().strength(0.06).y(height / 2))
-                    .force("collide", d3.forceCollide(6));
+                simulation.force('charge', d3.forceManyBody().strength(3))
+                    .force('x', d3.forceX().strength(0.06).x((element) => scale(element[chartKey])))
+                    .force('y', d3.forceY().strength(0.06).y(height / 2))
+                    .force('collide', d3.forceCollide(6));
 
                 simulation.alpha(1).restart();
 
-                node.append("g")
-                    .attr("transform", `translate(0, ${height / 2 + 50})`)
+                node.append('g')
+                    .attr('transform', `translate(0, ${height / 2 + 50})`)
                     .call(d3.axisBottom(scale))
-                    .attr("class", "axis");
-            } else if (chartType[chartKey] === "treemap") {
+                    .attr('class', 'axis');
+            } else if (chartType[chartKey] === 'treemap') {
                 showLabels.current = true;
 
-                simulation.force("charge", d3.forceManyBody().strength(3))
-                    .force("x", d3.forceX().strength(0.06).x((element) => getNodePosition(element, centers, chartKey).x))
-                    .force("y", d3.forceY().strength(0.06).y((element) => getNodePosition(element, centers, chartKey).y));
+                simulation.force('charge', d3.forceManyBody().strength(3))
+                    .force('x', d3.forceX().strength(0.06).x((element) => getNodePosition(element, centers, chartKey).x))
+                    .force('y', d3.forceY().strength(0.06).y((element) => getNodePosition(element, centers, chartKey).y));
 
                 simulation.alpha(1).restart();
             };
 
 
             function tick() {
-                circles.attr("cx", (node) => { return node.x })
-                    .attr("cy", (node) => { return node.y });
+                circles.attr('cx', (node) => { return node.x })
+                    .attr('cy', (node) => { return node.y });
 
                 const maxVelocity = d3.max(nodes, (node) => Math.max(node.vx, node.vy));
                 if (showLabels.current && maxVelocity > 0 && maxVelocity < 0.2) {
@@ -133,7 +133,7 @@ function Chart({ selectedPlaylistTracks, chartKey }) {
             function getCenters(data, chartKey, centerMethod) {
                 const centers = {};
 
-                if (centerMethod === "radial") {
+                if (centerMethod === 'radial') {
                     const children = getRadialChildren(data, chartKey);
                     children.forEach((element) => {
                         centers[element.id] = {
@@ -141,7 +141,7 @@ function Chart({ selectedPlaylistTracks, chartKey }) {
                             y: element.y
                         };
                     });
-                } else if (centerMethod === "treemap") {
+                } else if (centerMethod === 'treemap') {
                     const children = getTreemapChildren(data, chartKey);
                     children.forEach((element) => {
                         centers[element.id] = {
@@ -168,13 +168,12 @@ function Chart({ selectedPlaylistTracks, chartKey }) {
                     };
                 });
 
-                count.push({ name: "root" });
+                count.push({ name: 'root' });
 
                 const stratify = d3.stratify()
                     .parentId((element) => {
-                        if (element.name === "root") return null;
-
-                        return "root";
+                        if (element.name === 'root') return null;
+                        return 'root';
                     })
                     .id((element) => element.name);
 
@@ -201,13 +200,13 @@ function Chart({ selectedPlaylistTracks, chartKey }) {
                 };
             });
 
-            count.push({ name: "root" });
+            count.push({ name: 'root' });
 
             const stratify = d3.stratify()
                 .id(function (d) { return d.name })
                 .parentId(function (d) {
-                    if (d.name === "root") return null;
-                    else return "root";
+                    if (d.name === 'root') return null;
+                    return 'root';
                 });
 
             const root = stratify(count)
@@ -228,13 +227,13 @@ function Chart({ selectedPlaylistTracks, chartKey }) {
         function appendLabels(chartKey, node) {
             updateLabelPosition(chartKey);
 
-            labels.current = node.selectAll(".label")
+            labels.current = node.selectAll('.label')
                 .data(Object.keys(labelPosition.current))
                 .enter()
-                .append("text")
-                .attr("class", "label")
-                .attr("x", (element) => labelPosition.current[element].x)
-                .attr("y", (element) => labelPosition.current[element].y)
+                .append('text')
+                .attr('class', 'label')
+                .attr('x', (element) => labelPosition.current[element].x)
+                .attr('y', (element) => labelPosition.current[element].y)
                 .text((element) => element);
         };
 
@@ -257,22 +256,12 @@ function Chart({ selectedPlaylistTracks, chartKey }) {
                 };
             };
         };
-
-        function handleMouseOver(event) {
-            tooltip.current.html(event["target"])
-                .style("visibility", 1);
-        };
-
-        function handleMouseLeave() {
-            tooltip.current.style("visibility", 0);
-        };
-
     }, [chartKey]);
 
     return (
-        <div className="chart-container">
+        <div className='chart-container'>
             <svg
-                className="chart"
+                className='chart'
                 ref={chartRef}
             />
         </div>

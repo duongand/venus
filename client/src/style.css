@@ -73,5 +73,7 @@ body {
 }
 
 .label {
-  font-size: 16px;
+  font-size: 12px;
+  inline-size: 150px;
+  overflow-wrap: break-word;
 }
