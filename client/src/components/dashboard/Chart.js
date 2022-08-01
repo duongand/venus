@@ -21,6 +21,7 @@ function Chart({ selectedPlaylistTracks, chartKey }) {
     let labels = useRef(null);
     let showLabels = useRef(true);
     let labelPosition = useRef({});
+    let tooltip = useRef(null);
 
     const height = 650;
     const width = 1400;
@@ -35,6 +36,8 @@ function Chart({ selectedPlaylistTracks, chartKey }) {
                 .attr("viewBox", `0 0 ${width} ${height}`)
                 .attr("preserverAspectiveRatio", "xMidYMid meet");
 
+            const svgContainer = d3.select(".chart-container");
+
             const node = svg.append("g")
                 .attr("transform", `translate(${15}, ${15})`);
 
@@ -42,7 +45,7 @@ function Chart({ selectedPlaylistTracks, chartKey }) {
             labels.current = node.selectAll(".label");
 
             nodes = selectedPlaylistTracks.map((element) => {
-                element['radius'] = 5;
+                element["radius"] = 5;
                 return element;
             });
 
@@ -61,7 +64,26 @@ function Chart({ selectedPlaylistTracks, chartKey }) {
                 .attr("r", (node) => node.radius)
                 .attr("cx", (node) => node.x)
                 .attr("cy", (node) => node.y)
-                .attr("class", "bubble");
+                .attr("class", "bubble")
+                .on("mouseover", function(d) {
+                    tooltip.current.text(d["target"]["__data__"]["name"])
+                        .style("visibility", "visible")
+                        .style("left", d.pageX + "px")
+                        .style("top", d.pageY + "px")
+                })
+                .on("mouseleave", function(d) {
+                    tooltip.current.style("visibility", "hidden");
+                });
+
+            tooltip.current = svgContainer.append("div")
+                .attr("className", "tooltip")
+                .style("position", "absolute")
+                .style("visibility", "hidden")
+                .style("color", "black")
+                .style("background-color", "white")
+                .style("border", "1px solid black")
+                .style("border-radius", "5px")
+                .style("padding", "2px");
 
             simulation.nodes(nodes);
 
@@ -236,13 +258,24 @@ function Chart({ selectedPlaylistTracks, chartKey }) {
             };
         };
 
+        function handleMouseOver(event) {
+            tooltip.current.html(event["target"])
+                .style("visibility", 1);
+        };
+
+        function handleMouseLeave() {
+            tooltip.current.style("visibility", 0);
+        };
+
     }, [chartKey]);
 
     return (
-        <svg
-            className="chart"
-            ref={chartRef}
-        />
+        <div className="chart-container">
+            <svg
+                className="chart"
+                ref={chartRef}
+            />
+        </div>
     );
 };
 

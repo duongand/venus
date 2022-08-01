@@ -1,70 +1,14 @@
-# Getting Started with Create React App
+## venus
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+`venus` is a fun web application project utilizing React and D3.js to visualize your playlist songs pulled from the Spotify API. This project is an extension of `bird-scout` in incorporating an external API server-side; however, with a more [thorough authorization code flow](https://developer.spotify.com/documentation/general/guides/authorization/code-flow/).
 
-## Available Scripts
+[Live Demo](https://react-spotify-venus.herokuapp.com/)
 
-In the project directory, you can run:
+![demo-screenshot](./demo-screenshot.png)
+![demo-screenshot-2](<./demo-screenshot%20(2).png>)
 
-### `npm start`
+### Summary
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+I spend a majority of my day either listening to or searching for more music to pique my interest. Spotify is an application I cannot go a day without whether it's in the car, showering, or even cleaning. Spotify provides interesting [quantitative features](https://developer.spotify.com/documentation/web-api/reference/#/operations/get-audio-features) such as the danceability, energy, or tempo of a song. `venus` plots and compares those values using a [Beeswarm plot.](https://observablehq.com/@d3/beeswarm)
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
-
-### `npm test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+`venus` was an inspiration from my school alumni's [blog post](https://www.kexinzhang.com/2018/12/20/2018-in-music.html) reviewing her music taste in the 2020 year. I thought it was an awesome way to compare your music within a playlist and was greatly intrigued by the D3.js library. This provided invaluable experience working with React, Spotify's API, and the d3-force. Some struggles I encountered interesting behaviors using d3-force in a React application such as the re-rendering of a component causing the previous node positions and simulation to not retain its previous value due to re-rendering.
