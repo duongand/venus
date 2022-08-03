@@ -1,8 +1,15 @@
 import { useState, useEffect } from 'react';
+import axios from 'axios';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 
-const axios = require('axios');
+import {
+	extractPlaylistName,
+	extractPlaylistId,
+	extractTrackId,
+	compilePreTrackInformation,
+	compileFinalTrackInformation
+} from './responseCompileFunctions.js';
 
 function App() {
 	const [accessToken, setAccessToken] = useState(null);
@@ -45,20 +52,11 @@ function App() {
 				access_token: accessToken
 			}
 		}).then((response) => {
-			const tempPlaylistNames = response.data.items.map((playlist) => {
-				return playlist.name;
-			});
+			const compiledPlaylistNames = extractPlaylistName(response);
 
-			const tempPlaylistIds = {};
-			for (const playlist of response.data.items) {
-				tempPlaylistIds[playlist.name] = {
-					'id': playlist.id
-				};
-			};
-
-			setPlaylistNames(tempPlaylistNames);
-			setPlaylistIds(tempPlaylistIds)
-			setSelectedPlaylist(tempPlaylistNames[0]);
+			setPlaylistNames(compiledPlaylistNames);
+			setPlaylistIds(extractPlaylistId(response))
+			setSelectedPlaylist(compiledPlaylistNames[0]);
 		}).catch((error) => {
 			console.send(error);
 		});
@@ -73,24 +71,8 @@ function App() {
 				id: playlistIds[selectedPlaylist].id
 			}
 		}).then((response) => {
-			const trackIds = response.data.map((data) => {
-				return data.track.id;
-			});
-
-			const joinedTrackIds = trackIds.join(',');
-			setPlaylistTrackIds(joinedTrackIds);
-
-			const preTrackInformation = {}; 
-			response.data.map((data) => {
-				preTrackInformation[data.track.id] = {
-					'name': data.track.name,
-					'artist': data.track.artists[0].name,
-					'album': data.track.album.name,
-					'popularity': data.track.popularity
-				};
-			});
-
-			setTrackInformation(preTrackInformation);
+			setPlaylistTrackIds(extractTrackId(response).join(','));
+			setTrackInformation(compilePreTrackInformation(response));
 		}).catch((error) => {
 			console.log(error);
 		});
@@ -105,30 +87,7 @@ function App() {
 				track_ids: playlistTrackIds
 			}
 		}).then((response) => {
-			const data = response.data;
-
-			const tempCompiledInformation = [];
-			for (const track of data) {
-				const tempTrackId = track.id;
-
-				const tempTrack = {
-					'acousticness': track.acousticness,
-					'danceability': track.danceability,
-					'energy': track.energy,
-					'instrumentalness': track.instrumentalness,
-					'liveness': track.liveness,
-					'loudness': track.loudness,
-					'speechiness': track.speechiness,
-					'tempo': track.tempo,
-					'valence': track.valence,
-					'name': trackInformation[tempTrackId].name,
-					'artist': trackInformation[tempTrackId].artist,
-					'album': trackInformation[tempTrackId].album,
-					'popularity': trackInformation[tempTrackId].popularity
-				};
-				tempCompiledInformation.push(tempTrack);
-			};
-			setCompiledInformation(tempCompiledInformation);
+			setCompiledInformation(compileFinalTrackInformation(response, trackInformation));
 		}).catch((error) => {
 			console.log(error);
 		});
