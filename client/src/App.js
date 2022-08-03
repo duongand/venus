@@ -18,7 +18,7 @@ function App() {
 	const [playlistNames, setPlaylistNames] = useState([]);
 	const [playlistIds, setPlaylistIds] = useState({});
 	const [selectedPlaylist, setSelectedPlaylist] = useState('');
-	const [playlistTrackIds, setPlaylistTrackIds] = useState('');
+	const [trackIds, setTrackIds] = useState('');
 	const [trackInformation, setTrackInformation] = useState({});
 	const [compiledInformation, setCompiledInformation] = useState(null);
 
@@ -26,7 +26,7 @@ function App() {
 
 	function handlePlaylistChange(event) {
 		setSelectedPlaylist(event.target.value);
-		setPlaylistTrackIds('');
+		setTrackIds('');
 		setCompiledInformation(null);
 		setChartKey('artist');
 	};
@@ -63,7 +63,7 @@ function App() {
 	}, [accessToken]);
 
 	useEffect(() => {
-		if (selectedPlaylist === '') return;
+		if (!selectedPlaylist) return;
 
 		axios.get('/get_playlist_tracks', {
 			params: {
@@ -71,27 +71,27 @@ function App() {
 				id: playlistIds[selectedPlaylist].id
 			}
 		}).then((response) => {
-			setPlaylistTrackIds(extractTrackId(response).join(','));
+			setTrackIds(extractTrackId(response).join(','));
 			setTrackInformation(compilePreTrackInformation(response));
 		}).catch((error) => {
 			console.log(error);
 		});
-	}, [selectedPlaylist]);
+	}, [accessToken, playlistIds, selectedPlaylist]);
 
 	useEffect(() => {
-		if (playlistTrackIds === '') return;
+		if (!trackIds) return;
 
 		axios.get('/get_audio_features', {
 			params: {
 				access_token: accessToken,
-				track_ids: playlistTrackIds
+				track_ids: trackIds
 			}
 		}).then((response) => {
 			setCompiledInformation(compileFinalTrackInformation(response, trackInformation));
 		}).catch((error) => {
 			console.log(error);
 		});
-	}, [playlistTrackIds])
+	}, [accessToken, trackIds, trackInformation])
 
 	return (
 		<div className="App">

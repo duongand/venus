@@ -1,23 +1,29 @@
 import { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
+import {
+    getCenters,
+    getNodePosition
+} from './chartHelper.js';
+
+const chartType = {
+    'name': 'treemap',
+    'artist': 'treemap',
+    'album': 'treemap',
+    'danceability': 'radial',
+    'energy': 'radial',
+    'liveness': 'radial',
+    'loudness': 'radial',
+    'popularity': 'radial',
+    'speechiness': 'radial',
+    'tempo': 'radial'
+};
 
 function Chart({ selectedPlaylistTracks, chartKey }) {
-    const chartType = {
-        'name': 'treemap',
-        'artist': 'treemap',
-        'album': 'treemap',
-        'danceability': 'radial',
-        'energy': 'radial',
-        'liveness': 'radial',
-        'loudness': 'radial',
-        'popularity': 'radial',
-        'speechiness': 'radial',
-        'tempo': 'radial'
-    };
-
     let chartRef = useRef(null);
-    let nodes = useRef(null);
-    let circles = useRef(null);
+    let nodes = useRef(selectedPlaylistTracks.map((element) => {
+        element['radius'] = 5;
+        return element;
+    }));
     let labels = useRef(null);
     let showLabels = useRef(true);
     let labelPosition = useRef({});
@@ -41,37 +47,29 @@ function Chart({ selectedPlaylistTracks, chartKey }) {
             const node = svg.append('g')
                 .attr('transform', `translate(${15}, ${15})`);
 
-            circles.current = node.selectAll('.bubble');
-            labels.current = node.selectAll('.label');
-
-            nodes = selectedPlaylistTracks.map((element) => {
-                element['radius'] = 5;
-                return element;
-            });
-
-            const centers = getCenters(nodes, chartKey, chartType[chartKey]);
+            const centers = getCenters(nodes.current, chartKey, chartType[chartKey]);
 
             const simulation = d3.forceSimulation()
                 .velocityDecay(0.2)
                 .force('charge', d3.forceManyBody().strength(7))
-                .force('collide', d3.forceCollide().radius(function (d) { return d.radius }))
+                .force('collide', d3.forceCollide().radius(function (node) { return node.radius }))
                 .on('tick', tick);
 
-            circles = node.selectAll('.bubble')
-                .data(nodes)
+            const circles = node.selectAll('.bubble')
+                .data(nodes.current)
                 .enter()
                 .append('circle')
                 .attr('r', (node) => node.radius)
                 .attr('cx', (node) => node.x)
                 .attr('cy', (node) => node.y)
                 .attr('class', 'bubble')
-                .on('mouseover', function(d) {
-                    tooltip.current.html(`${d['target']['__data__']['name']}<br/>${d['target']['__data__']['artist']}`)
+                .on('mouseover', (node) => {
+                    tooltip.current.html(`${node['target']['__data__']['name']}<br/>${node['target']['__data__']['artist']}`)
                         .style('visibility', 'visible')
-                        .style('left', d.pageX + 'px')
-                        .style('top', d.pageY + 'px')
+                        .style('left', node.pageX + 'px')
+                        .style('top', node.pageY + 'px')
                 })
-                .on('mouseleave', function(d) {
+                .on('mouseleave', () => {
                     tooltip.current.style('visibility', 'hidden');
                 });
 
@@ -85,14 +83,14 @@ function Chart({ selectedPlaylistTracks, chartKey }) {
                 .style('border-radius', '5px')
                 .style('padding', '2px');
 
-            simulation.nodes(nodes);
+            simulation.nodes(nodes.current);
 
             if (chartType[chartKey] === 'radial') {
                 let min, max;
                 showLabels.current = false;
 
-                if (min === undefined) { min = d3.min(nodes, (element) => element[chartKey]) };
-                if (max === undefined) { max = d3.max(nodes, (element) => element[chartKey]) };
+                if (min === undefined) { min = d3.min(nodes.current, (element) => element[chartKey]) };
+                if (max === undefined) { max = d3.max(nodes.current, (element) => element[chartKey]) };
 
                 const scale = d3.scaleLinear()
                     .domain([min, max])
@@ -119,144 +117,50 @@ function Chart({ selectedPlaylistTracks, chartKey }) {
                 simulation.alpha(1).restart();
             };
 
-
             function tick() {
                 circles.attr('cx', (node) => { return node.x })
                     .attr('cy', (node) => { return node.y });
 
-                const maxVelocity = d3.max(nodes, (node) => Math.max(node.vx, node.vy));
+                const maxVelocity = d3.max(nodes.current, (node) => Math.max(node.vx, node.vy));
                 if (showLabels.current && maxVelocity > 0 && maxVelocity < 0.2) {
                     appendLabels(chartKey, node);
                 };
             };
 
-            function getCenters(data, chartKey, centerMethod) {
-                const centers = {};
+            function appendLabels(chartKey, node) {
+                updateLabelPosition(chartKey);
 
-                if (centerMethod === 'radial') {
-                    const children = getRadialChildren(data, chartKey);
-                    children.forEach((element) => {
-                        centers[element.id] = {
-                            x: element.x,
-                            y: element.y
-                        };
-                    });
-                } else if (centerMethod === 'treemap') {
-                    const children = getTreemapChildren(data, chartKey);
-                    children.forEach((element) => {
-                        centers[element.id] = {
-                            x: (element.x0 + element.x1) / 2,
-                            y: (element.y0 + element.y1) / 2,
-                        };
-                    });
-                };
-
-                return centers;
+                labels.current = node.selectAll('.label')
+                    .data(Object.keys(labelPosition.current))
+                    .enter()
+                    .append('text')
+                    .attr('class', 'label')
+                    .attr('x', (element) => labelPosition.current[element].x)
+                    .attr('y', (element) => labelPosition.current[element].y)
+                    .text((element) => element);
             };
 
-            function getNodePosition(node, centers, chartKey) {
-                return centers[node[chartKey]];
-            };
+            function updateLabelPosition(chartKey) {
+                labelPosition.current = {};
 
-            function getRadialChildren(data, chartKey) {
-                let count = Array.from(d3.rollup(data, v => v.length, d => d[chartKey]));
+                let agg = Array.from(d3.rollup(nodes.current,
+                    (node) => {
+                        return {
+                            x: d3.mean(node, (element) => element.x) - 10,
+                            y: d3.max(node, (element) => element.y) + 20,
+                        }
+                    },
+                    (element) => element[chartKey]));
 
-                count = count.map((element) => {
-                    return {
-                        name: element[0],
-                        size: element[1],
+                for (const element of agg) {
+                    labelPosition.current[element[0]] = {
+                        x: element[1].x,
+                        y: element[1].y
                     };
-                });
-
-                count.push({ name: 'root' });
-
-                const stratify = d3.stratify()
-                    .parentId((element) => {
-                        if (element.name === 'root') return null;
-                        return 'root';
-                    })
-                    .id((element) => element.name);
-
-                const root = stratify(count)
-                    .sum((element) => Math.sqrt(element.size))
-                    .sort((a, b) => {
-                        return b.size - a.size;
-                    });
-
-                const pack = d3.pack().size([width, height])
-                    .padding(20);
-
-                return pack(root).descendants();
-            };
-        };
-
-        function getTreemapChildren(data, chartKey) {
-            let count = Array.from(d3.rollup(data, v => v.length, d => d[chartKey]));
-
-            count = count.map((element) => {
-                return {
-                    name: element[0],
-                    size: element[1]
-                };
-            });
-
-            count.push({ name: 'root' });
-
-            const stratify = d3.stratify()
-                .id(function (d) { return d.name })
-                .parentId(function (d) {
-                    if (d.name === 'root') return null;
-                    return 'root';
-                });
-
-            const root = stratify(count)
-                .sum((element) => Math.sqrt(element.size))
-                .sort((a, b) => {
-                    return b.size - a.size;
-                });
-
-            const treemap = d3.treemap()
-                .size([width, height])
-                .tile(d3.treemapSquarify.ratio(1))
-                .paddingOuter(50);
-
-            treemap(root);
-            return root.children;
-        };
-
-        function appendLabels(chartKey, node) {
-            updateLabelPosition(chartKey);
-
-            labels.current = node.selectAll('.label')
-                .data(Object.keys(labelPosition.current))
-                .enter()
-                .append('text')
-                .attr('class', 'label')
-                .attr('x', (element) => labelPosition.current[element].x)
-                .attr('y', (element) => labelPosition.current[element].y)
-                .text((element) => element);
-        };
-
-        function updateLabelPosition(chartKey) {
-            labelPosition.current = {};
-
-            let agg = Array.from(d3.rollup(nodes,
-                (node) => {
-                    return {
-                        x: d3.mean(node, (element) => element.x) - 10,
-                        y: d3.max(node, (element) => element.y) + 20,
-                    }
-                },
-                (element) => element[chartKey]));
-
-            for (const element of agg) {
-                labelPosition.current[element[0]] = {
-                    x: element[1].x,
-                    y: element[1].y
                 };
             };
         };
-    }, [chartKey]);
+    }, [selectedPlaylistTracks, chartKey]);
 
     return (
         <div className='chart-container'>

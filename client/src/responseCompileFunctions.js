@@ -23,14 +23,14 @@ function extractTrackId(response) {
 
 function compilePreTrackInformation(response) {
     const preTrackInformation = {};
-    response.data.map((data) => {
+    for (const data of response.data) {
         preTrackInformation[data.track.id] = {
             'name': data.track.name,
             'artist': data.track.artists[0].name,
             'album': data.track.album.name,
             'popularity': data.track.popularity
         };
-    });
+    };
 
     return preTrackInformation;
 };
