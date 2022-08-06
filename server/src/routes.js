@@ -108,7 +108,7 @@ apiRouter.get('/get_playlists', (req, res) => {
         headers: {
             'Accept': 'Application/x-www-form-urlencoded',
             'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'apiRouterlication/json',
+            'Content-Type': 'application/json/json',
         }
     }).then((response) => {
         res.send(response.data);
@@ -129,7 +129,7 @@ apiRouter.get('/get_playlist_tracks', (req, res) => {
         headers: {
             'Accept': 'Application/x-www-form-urlencoded',
             'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'apiRouterlication/json',
+            'Content-Type': 'application/json/json',
         }
     }).then((response) => {
         res.send(response.data.items);
@@ -149,7 +149,7 @@ apiRouter.get('/get_audio_features', (req, res) => {
         headers: {
             'Accept': 'Application/x-www-form-urlencoded',
             'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'apiRouterlication/json',
+            'Content-Type': 'application/json/json',
         }
     }).then((response) => {
         res.send(response.data.audio_features);
