@@ -10,7 +10,7 @@ body {
   background-color: black;
 }
 
-.bubble, .label {
+.circle, .label {
   fill: white;
 }
 
@@ -47,6 +47,7 @@ body {
 }
 
 .dashboard {
+  margin-top: 10px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -69,9 +70,13 @@ body {
 }
 
 .dashboard--buttons:hover {
-  opacity: 50%;
+  opacity: 75%;
 }
 
-.label {
-  font-size: 12px;
+.chart-container {
+  display: inline-block;
+  position: relative;
+  width: 100%;
+  vertical-align: top;
+  overflow: hidden;
 }

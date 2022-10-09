@@ -3,31 +3,19 @@ import axios from 'axios';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 
-import {
-	extractPlaylistName,
-	extractPlaylistId,
-	extractTrackId,
-	compilePreTrackInformation,
-	compileFinalTrackInformation
-} from './responseCompileFunctions.js';
+import { compilePlaylistInformation } from './util/helpers.js';
 
 function App() {
-	const [accessToken, setAccessToken] = useState(null);
-	const [refreshToken, setRefreshToken] = useState(null);
-
-	const [playlistNames, setPlaylistNames] = useState([]);
-	const [playlistIds, setPlaylistIds] = useState({});
-	const [selectedPlaylist, setSelectedPlaylist] = useState('');
-	const [trackIds, setTrackIds] = useState('');
-	const [trackInformation, setTrackInformation] = useState({});
-	const [compiledInformation, setCompiledInformation] = useState(null);
-
+	const [accessToken, setAccessToken] = useState(undefined);
+	// const [refreshToken, setRefreshToken] = useState(null);
+	const [playlistInformation, setPlaylistInformation] = useState([]);
+	const [selectedPlaylist, setSelectedPlaylist] = useState(undefined);
+	const [playlistTracks, setPlaylistTracks] = useState(undefined);
 	const [chartKey, setChartKey] = useState('artist');
 
 	function handlePlaylistChange(event) {
 		setSelectedPlaylist(event.target.value);
-		setTrackIds('');
-		setCompiledInformation(null);
+		setPlaylistTracks(null);
 		setChartKey('artist');
 	};
 
@@ -39,67 +27,48 @@ function App() {
 		if (window.location.search) {
 			const urlParams = new URLSearchParams(window.location.search);
 			setAccessToken(urlParams.get('access_token'));
-			setRefreshToken(urlParams.get('refresh_token'));
+			// setRefreshToken(urlParams.get('refresh_token'));
 			window.history.pushState({}, null, '/');
 		};
 	}, [])
 
 	useEffect(() => {
-		if (accessToken === null) return;
+		if (!accessToken) return;
 
 		axios.get('/get_playlists', {
 			params: {
 				access_token: accessToken
 			}
 		}).then((response) => {
-			const compiledPlaylistNames = extractPlaylistName(response);
-
-			setPlaylistNames(compiledPlaylistNames);
-			setPlaylistIds(extractPlaylistId(response))
-			setSelectedPlaylist(compiledPlaylistNames[0]);
+			setPlaylistInformation(compilePlaylistInformation(response.data));
+			setSelectedPlaylist(response.data[0].name);
 		}).catch((error) => {
-			console.send(error);
+			console.log(error);
 		});
 	}, [accessToken]);
 
 	useEffect(() => {
-		if (!selectedPlaylist) return;
+		if (!selectedPlaylist || !accessToken) return;
 
-		axios.get('/get_playlist_tracks', {
+		axios.get('/playlist_features', {
 			params: {
 				access_token: accessToken,
-				id: playlistIds[selectedPlaylist].id
+				id: playlistInformation[selectedPlaylist]
 			}
 		}).then((response) => {
-			setTrackIds(extractTrackId(response).join(','));
-			setTrackInformation(compilePreTrackInformation(response));
+			setPlaylistTracks(response.data);
 		}).catch((error) => {
 			console.log(error);
 		});
-	}, [accessToken, playlistIds, selectedPlaylist]);
-
-	useEffect(() => {
-		if (!trackIds) return;
-
-		axios.get('/get_audio_features', {
-			params: {
-				access_token: accessToken,
-				track_ids: trackIds
-			}
-		}).then((response) => {
-			setCompiledInformation(compileFinalTrackInformation(response, trackInformation));
-		}).catch((error) => {
-			console.log(error);
-		});
-	}, [accessToken, trackIds, trackInformation])
+	}, [accessToken, playlistInformation, selectedPlaylist]);
 
 	return (
 		<div className="App">
 			{accessToken ?
 				<Dashboard
-					playlistNames={playlistNames}
+					playlists={playlistInformation}
 					selectedPlaylist={selectedPlaylist}
-					selectedPlaylistTracks={compiledInformation}
+					playlistTracks={playlistTracks}
 					chartKey={chartKey}
 					handlePlaylistChange={handlePlaylistChange}
 					handleKeyChange={handleKeyChange}

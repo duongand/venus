@@ -1,7 +1,7 @@
-function Options({ playlistNames, handlePlaylistChange }) {
-    const playlistOptions = playlistNames.map((playlist) => (
-        <option value={playlist}>{playlist}</option>
-    ));
+function Options({ playlists, handlePlaylistChange }) {
+    const playlistOptions = Object.keys(playlists).map((title) => {
+        return <option value={title}>{title}</option>
+    });
 
     return (
         <>

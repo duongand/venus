@@ -2,13 +2,13 @@ import Options from "./dashboard/Options";
 import KeyButtons from "./dashboard/KeyButtons";
 import Chart from "./dashboard/Chart";
 
-function Dashboard({ playlistNames, selectedPlaylistTracks, chartKey, handlePlaylistChange, handleKeyChange }) {
+function Dashboard({ playlists, playlistTracks, chartKey, handlePlaylistChange, handleKeyChange }) {
     return (
         <div className="dashboard">
             <h1 className="dashboard--title">DASHBOARD</h1>
-            {playlistNames && <Options playlistNames={playlistNames} handlePlaylistChange={handlePlaylistChange} />}
+            {playlists && <Options playlists={playlists} handlePlaylistChange={handlePlaylistChange} />}
             <KeyButtons handleKeyChange={handleKeyChange}/>
-            {selectedPlaylistTracks && chartKey && <Chart selectedPlaylistTracks={selectedPlaylistTracks} chartKey={chartKey}/>}
+            {playlistTracks && chartKey && <Chart playlistTracks={playlistTracks} chartKey={chartKey}/>}
         </div>
     );
 };
