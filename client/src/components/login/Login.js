@@ -6,7 +6,7 @@ function Login() {
       <h1 className="login-page--title">venus</h1>
       <Description />
       <button className="login-page--login-button">
-        <a className="login-page--login-text" href="/login">Login with Spotify</a>
+        <a className="login-page--login-text" href="https://react-spotify-venus.herokuapp.com//login">Login with Spotify</a>
       </button>
     </div>
   );
