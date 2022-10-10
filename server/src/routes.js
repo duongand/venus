@@ -64,9 +64,9 @@ apiRouter.get('/callback', (req, res) => {
                     expires_in: response.data.expires_in
                 }).toString();
 
-                res.redirect(`http://localhost:8888/?${params}`);
+                res.redirect(`https://react-spotify-venus.herokuapp.com/?${params}`);
             } else {
-                res.redirect(`http://localhost:8888/?${new URLSearchParams({
+                res.redirect(`https://react-spotify-venus.herokuapp.com/?${new URLSearchParams({
                     error: 'invalid_token'
                 })}`);
             };
