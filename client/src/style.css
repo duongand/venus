@@ -25,6 +25,14 @@ body {
 
 .login-page--title {
   color: #ffffff;
+  font-size: 48px;
+}
+
+.login--description {
+  width: 300px;
+  color: #ffffff;
+  margin-bottom: 20px;
+  text-align: center;
 }
 
 .login-page--login-button {

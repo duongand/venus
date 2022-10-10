@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import Login from './components/Login';
-import Dashboard from './components/Dashboard';
+import Login from './components/login/Login';
+import Dashboard from './components/dashboard/Dashboard';
 
 import { compilePlaylistInformation } from './util/helpers.js';
 

@@ -1,4 +1,5 @@
 import * as d3 from 'd3';
+import * as collection from 'd3-collection';
 
 export const height = 600;
 export const width = 1300;
@@ -101,4 +102,38 @@ function extractTreemapPosition(children) {
   };
 
   return centers;
+}
+
+function getLabelPositions(nodes, key) {
+  const nestedArray = collection.nest()
+    .key(function (d) { return d[key]; })
+    .entries(nodes);
+
+  const labelPositions = [];
+  const groupedNodes = d3.group(nodes, function(d) { return d[key]; })
+  for (const label of nestedArray) {
+    const labelNodes = groupedNodes.get(label.key);
+    const xPosition = d3.mean(labelNodes, function(d) { return d.x; });
+    const yPosition = d3.mean(labelNodes, function(d) { return d.y; });
+    labelPositions.push({
+      label: label.key,
+      x: xPosition,
+      y: yPosition,
+    });
+  };
+  
+  return labelPositions;
+};
+
+export function showLabel(svg, nodes, key) {
+  const labelPositions = getLabelPositions(nodes, key);
+
+  svg.selectAll('.label')
+    .data(labelPositions)
+    .enter()
+    .append('text')
+    .attr('class', 'label')
+    .attr('x', function(d) { return d.x - 15; })
+    .attr('y', function(d) { return d.y + 35; })
+    .text(function(d) { return d.label });
 }

@@ -5,7 +5,8 @@ import {
   height,
   width,
   setNodePositions,
-  getNodePosition
+  getNodePosition,
+  showLabel,
 } from '../../util/chartHelpers.js';
 
 const chartType = {
@@ -74,7 +75,7 @@ function Chart({ playlistTracks, chartKey }) {
         .style('padding', '2px');
 
       const simulation = d3.forceSimulation()
-        .velocityDecay(0.2)
+        .velocityDecay(0.3)
         .force('charge', d3.forceManyBody().strength(7))
         .force('collide', d3.forceCollide().radius((node) => { return node.radius }))
         .on('tick', tick);
@@ -102,7 +103,7 @@ function Chart({ playlistTracks, chartKey }) {
           .attr('class', 'axis');
       } else if (chartType[chartKey] === 'treemap') {
         simulation.force('charge', d3.forceManyBody().strength(3))
-          .force('x', d3.forceX().strength(0.06).x((element) => { return getNodePosition(element, centers, chartKey).x; }))
+          .force('x', d3.forceX().strength(0.07).x((element) => { return getNodePosition(element, centers, chartKey).x; }))
           .force('y', d3.forceY().strength(0.08).y((element) => { return getNodePosition(element, centers, chartKey).y; }));
       };
 
@@ -111,6 +112,11 @@ function Chart({ playlistTracks, chartKey }) {
       function tick() {
         circles.attr('cx', (node) => { return node.x; })
           .attr('cy', (node) => { return node.y; });
+
+        let maxVelocity = d3.max(nodes.current, function (d) { return Math.max(d.vx, d.vy); });
+        if (chartType[chartKey] === 'treemap' && d3.selectAll('.label').empty() && maxVelocity < 0.07) {
+          showLabel(node_container, nodes.current, chartKey);
+        }
       };
     };
   }, [playlistTracks, chartKey]);
